@@ -21,3 +21,7 @@ run `python main.py`
 
 Label predictions will be saved on `Prediction/test/1111-pred.nrrd`
 
+## Step 4 (optional)
+
+Add "vel_struct
+
