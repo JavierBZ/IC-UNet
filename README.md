@@ -23,5 +23,5 @@ Label predictions will be saved on `Prediction/test/1111-pred.nrrd`
 
 ## Step 4 (optional)
 
-Add "vel_struct
+Add `vel_struct.mat` to `data` and use `analyze_flow.ipynb`
 
