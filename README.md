@@ -10,11 +10,14 @@ Create conda environment with
 
 ## Step 2
 
+Add segmentation file to `data` and weights to `models`
+
 Convert segmentation to nrrd format:
-* Change ` tof_mask_struct_path` directory in `to_nrrd.py`
+* Change ` tof_mask_struct_path` (e.g `data/tof_mask_struct.mat`) directory in `to_nrrd.py`
 
 ## Step 3
 
+run `python main.py`
 
-
+Label predictions will be saved on `Prediction/test/1111-pred.nrrd`
 

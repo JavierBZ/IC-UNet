@@ -1,0 +1,59 @@
+dataset:
+  directorio_rutas: dataset_paths
+  conjuntos: dataset_paths/ids_data.json
+  etiquetas: dataset_paths/labels.json
+  imagenes: dataset_paths/image_paths.json
+
+sweep:
+  method: random
+  parameters:
+    optimizer:
+      values:
+        - adam
+        - sgd
+    epochs:
+      values:
+        - 500
+    batch_size:
+      values:
+        - 1
+        - 3
+        - 5
+    learning_rate:
+      distribution: uniform
+      max: 0.01
+      min: 0.001
+
+  metric:
+    name: val_dice_promedio
+    goal: maximize
+
+base:
+  modelo: unet
+  channels: 1
+  capas_resnet: 6
+  metricas: dice
+  loss: DiceCE
+  batch_size_test: 1
+  clases: 11
+  epochs: 3000
+  beta: 750
+  gamma: 1500
+  learning_rate: 0.0005
+  #batch size soportados: 1, 3, 5, 7
+  batch_size: 3
+  optimizer: adam
+  hacer_sweep: False
+  dropout: 0.1
+
+  checkpoint_path: "/proj/multipress/users/x_javbi/SebastianJofre/wandb/run-20241030_143347-jr0hgjyl/files/best_model.pt"
+
+  model_evaluation_path: "C:/Users/javie/OneDrive/Documentos/Tesis-local/Intracranial/SebastianJofre/models/fold_1best_model.pt"
+  # model_evaluation_path: "/proj/multipress/users/x_javbi/SebastianJofre/wandb/run-20241023_192203-aic3r884/files/epocas_975_train_0.9827174544334412_test_0.8784001469612122.pt"
+  model_evaluation_output: "Predictions/test"
+
+  wandb:
+    modo: online
+    name: ResUnet-Rot
+    nombre_proyecto: unet
+    sweep_count: 25

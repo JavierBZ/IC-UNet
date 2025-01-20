@@ -35,6 +35,6 @@ def to_nrrd(mat_file, nrrd_file):
 
 
 if  __name__ == '__main__':
-    tof_mask_struct_path = 'GW_tof_mask_struct_Winter.mat'
-    nrrd_file = '1111.nrrd'
+    tof_mask_struct_path = 'data/tof_mask_struct.mat'
+    nrrd_file = 'data/1111.nrrd'
     to_nrrd(tof_mask_struct_path, nrrd_file)
