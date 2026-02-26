@@ -219,7 +219,7 @@ If you use this code in your research, please cite:
 ```bibtex
 @article{bisbal2025automated,
   title={Automated Labeling of Intracranial Arteries with Uncertainty Quantification Using Deep Learning},
-  author={Bisbal, Javier and Winter, Patrick and Jofre, Sebastian and Ponce, Aaron and Ansari, Sameer A and Abdalla, Ramez and Markl, Michael and Odeback, Oliver Welin and Uribe, Sergio and Tejos, Cristian and others},
+  author={Bisbal, Javier and Winter, Patrick and Jofre, Sebastian and Ponce, Aaron and Ansari, Sameer A and Abdalla, Ramez and Markl, Michael and Odeback, Oliver Welin and Tejos, Cristian and Uribe, Sergio and Schnell, Susanne and Marlevi, David},
   journal={arXiv preprint arXiv:2509.17726},
   year={2025}
 }
