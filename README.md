@@ -6,7 +6,7 @@ Cross-validation is performed using 5-fold CV.
 
 ---
 
-![](Overview-updated4.jpg)
+![](imgs/Overview-updated4.jpg)
 
 ## Repository Structure
 
