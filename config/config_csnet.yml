@@ -1,0 +1,54 @@
+dataset:
+  route_paths: dataset_paths
+
+sweep:
+  method: random
+  parameters:
+    optimizer:
+      values:
+        - adam
+        - sgd
+    epochs:
+      values:
+        - 500
+    batch_size:
+      values:
+        - 1
+        - 3
+        - 5
+    learning_rate:
+      distribution: uniform
+      max: 0.01
+      min: 0.001
+
+  metric:
+    name: val_dice_promedio
+    goal: maximize
+
+base:
+  model: CSNet
+  channels: 1
+  resnet_layers: 6
+  metrics: dice
+  loss: DiceCE
+  batch_size_test: 1
+  classes: 11
+  epochs: 6000
+  beta: 2000
+  gamma: 3500
+  learning_rate: 0.0005
+  batch_size: 3
+  optimizer: adam
+  do_sweep: False
+  dropout: 0.05
+
+  model_evaluation_output: "/Predictions-CSNet"
+
+  wandb:
+    mode: online
+    name: CSNet-R2
+    project_name: csnet
+    sweep_count: 25
+    # Wandb run IDs for each fold (fold 0 → fold 4), used to locate saved models
+    # during evaluation. Fill these in after training all five folds.
+    run_ids: ["", "", "", "", ""]
