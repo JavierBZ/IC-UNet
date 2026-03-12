@@ -16,16 +16,17 @@ Cross-validation is performed using 5-fold CV.
 ├── test.py                   # Test evaluation with TTA and metric logging
 ├── prepare_data.py           # Dataset preparation: CV splits, route JSONs, nnUNet folders
 ├── custom_tta_nnunet.py      # TTA post-processing for nnUNet predictions
+├── run_nnunet_eval.sh        # nnUNet inference + TTA post-processing script
 │
 ├── src/
 │   ├── dataloader.py         # MONAI transforms and label conversion
 │   ├── losses.py             # Loss function definitions
 │   ├── metrics.py            # Metric definitions
-│   ├── models.py             # Model definitions (UNet, UNETR, SwinUNETR, CSNet3D)
+│   ├── models.py             # Model definitions (UNet, CSNet3D)
 │   └── optimizers.py         # Optimizer definitions
 │
 └── config/
-    ├── config_unet.yml       # Configuration for UNet / UNETR / SwinUNETR
+    ├── config_unet.yml       # Configuration for UNet
     └── config_csnet.yml      # Configuration for CSNet3D
 ```
 
@@ -50,29 +51,86 @@ Each `{patient}` folder corresponds to one case. Labels use the following intege
 
 | Value | Structure |
 |-------|-----------|
-| 1     | Basilar Artery (BA) |
-| 2     | Left Anterior Cerebral Artery (LACA) |
-| 3     | Left Internal Carotid Artery (LICA) |
-| 4     | Left Middle Cerebral Artery (LMCA) |
-| 5     | Right Anterior Cerebral Artery (RACA) |
-| 6     | Right Internal Carotid Artery (RICA) |
-| 7     | Right Middle Cerebral Artery (RMCA) |
-| 8     | Right Posterior Cerebral Artery (RPCA) |
-| 9     | Left Posterior Cerebral Artery (LPCA) |
-| 10    | Non-annotated vessels (NA) |
+| 1  | Basilar Artery (BA) |
+| 2  | Left Anterior Cerebral Artery (LACA) |
+| 3  | Left Internal Carotid Artery (LICA) |
+| 4  | Left Middle Cerebral Artery (LMCA) |
+| 5  | Right Anterior Cerebral Artery (RACA) |
+| 6  | Right Internal Carotid Artery (RICA) |
+| 7  | Right Middle Cerebral Artery (RMCA) |
+| 8  | Right Posterior Cerebral Artery (RPCA) |
+| 9  | Left Posterior Cerebral Artery (LPCA) |
+| 10 | Non-annotated vessels (NA) |
 
 ---
 
 ## Environment Setup
 
 ```bash
-conda env create -f env/environment.yml
+conda env create -f environment.yml
 conda activate unet
 ```
 
 ---
 
+## Pretrained Weights
+
+Pretrained model weights for all five folds (UNet and CSNet) and all five folds (nnUNet) are available for download.
+
+**Download:** [[GDRIVE_LINK]](https://drive.google.com/drive/folders/1UQ4uxmMWabp84kFqoRIdz8ZLCWcvfasb?usp=sharing)
+
+### UNet / CSNet weights
+
+After downloading, place the weight files in model-specific subdirectories under `wandb/`:
+
+```
+wandb/
+├── UNet/
+│   ├── fold_0_last_model.pt
+│   ├── fold_1_last_model.pt
+│   ├── fold_2_last_model.pt
+│   ├── fold_3_last_model.pt
+│   └── fold_4_last_model.pt
+└── CSNet/
+    ├── fold_0_last_model.pt
+    ├── fold_1_last_model.pt
+    ├── fold_2_last_model.pt
+    ├── fold_3_last_model.pt
+    └── fold_4_last_model.pt
+```
+
+Then set all `run_ids` to empty strings in your config file:
+
+```yaml
+wandb:
+  run_ids: ["", "", "", "", ""]
+```
+
+The evaluation script will automatically detect this mode and select the correct subfolder based on the `model` field in your config (`wandb/UNet/` for `unet`; `wandb/CSNet/` for `CSNet`).
+
+### nnUNet weights
+
+Place the downloaded nnUNet checkpoints under `nnUNet_models/`, one subdirectory per fold:
+
+```
+nnUNet_models/
+├── f0/
+│   └── checkpoint_final.pth
+├── f1/
+│   └── checkpoint_final.pth
+├── f2/
+│   └── checkpoint_final.pth
+├── f3/
+│   └── checkpoint_final.pth
+└── f4/
+    └── checkpoint_final.pth
+```
+
+---
+
 ## Step 1 – Dataset Preparation
+
+> **Skip this step** if you only want to run evaluation with pretrained weights and already have your test data in the expected layout.
 
 Run `prepare_data.py` once before training. It performs the following steps in a single run:
 
@@ -123,7 +181,7 @@ Key fields under `base`:
 
 | Field | Description |
 |-------|-------------|
-| `model` | One of `unet`, `unetr`, `SwinUNETR`, `CSNet` |
+| `model` | One of `unet`, `CSNet` |
 | `classes` | Number of output classes (11, including background) |
 | `epochs` | Total training epochs |
 | `learning_rate` | Initial learning rate |
@@ -137,6 +195,8 @@ The `dataset.route_paths` field must match the prefix of your JSON route folders
 
 ## Step 3 – Weights & Biases
 
+> **Skip this step** if you are only running evaluation with pretrained weights.
+
 Training uses [Weights & Biases](https://wandb.ai/) for experiment tracking.
 
 ```bash
@@ -149,6 +209,8 @@ Set `wandb.mode: offline` in the config file if you do not want to sync runs.
 
 ## Step 4 – Training
 
+> **Skip this step** if you are only running evaluation with pretrained weights.
+
 Train a single fold:
 
 ```bash
@@ -160,31 +222,38 @@ Repeat for folds 1–4. Each run saves the final model weights inside the corres
 
 ---
 
-## Step 5 – Evaluation
+## Step 5 – Evaluation (UNet / CSNet)
 
-Evaluate using the saved model for a single fold:
+### Using pretrained weights
+
+Set `run_ids` to empty strings in the config (see [Pretrained Weights](#pretrained-weights)), then run:
 
 ```bash
+# Single fold
 python main.py 0 --config-route config/config_unet.yml --eval
-```
+python main.py 0 --config-route config/config_csnet.yml --eval
 
-Run ensemble evaluation across all five fold models:
-
-```bash
+# Ensemble across all five folds
 python main.py 0 --config-route config/config_unet.yml --eval --ensemble
+python main.py 0 --config-route config/config_csnet.yml --eval --ensemble
 ```
 
-The script auto-discovers model files under `wandb/*/files/fold_{f}_last_model.pt`.
+### Using weights from your own training runs
+
+Set `wandb.run_ids` in the config to the run IDs produced during training, then run the same commands above. The script will locate model files under `wandb/*/files/fold_{f}_last_model.pt`.
 
 Outputs saved to the path specified by `model_evaluation_output` in the config:
-- `{ID}-input.nrrd` — input image
-- `{ID}-true.nrrd` — ground truth label
-- `{ID}-pred.nrrd` — model prediction (no TTA)
-- `{ID}-mode.nrrd` — TTA prediction (coordinate-mapping aggregation)
-- `{ID}-old_mode.nrrd` — TTA prediction (inverse-transform aggregation)
-- `{ID}-error.nrrd` — error map
-- `{ID}-std.nrrd`, `{ID}-old_std.nrrd` — uncertainty maps
-- `fold_{f}_metrics.csv` — per-sample per-class Dice scores
+
+| File | Description |
+|------|-------------|
+| `{ID}-input.nrrd` | Input image |
+| `{ID}-true.nrrd` | Ground truth label |
+| `{ID}-pred.nrrd` | Model prediction (no TTA) |
+| `{ID}-mode.nrrd` | TTA prediction (coordinate-mapping aggregation) |
+| `{ID}-old_mode.nrrd` | TTA prediction (inverse-transform aggregation) |
+| `{ID}-error.nrrd` | Error map |
+| `{ID}-std.nrrd`, `{ID}-old_std.nrrd` | Uncertainty maps |
+| `fold_{f}_metrics.csv` | Per-sample per-class Dice scores |
 
 ---
 
@@ -200,15 +269,47 @@ Those augmentations are appropriate for grayscale images but distort the data in
 
 Follow the nnUNet documentation for dataset fingerprinting, planning, and training. Use `Dataset100` as the dataset identifier, which matches the folder names generated by `prepare_data.py`.
 
+### Evaluation (nnUNet)
+
+A convenience script `run_nnunet_eval.sh` is provided. It runs nnUNet inference across all configured folds and TTA passes, then calls `custom_tta_nnunet.py` for aggregation.
+
+**1. Configure the script**
+
+Open `run_nnunet_eval.sh` and edit the variables at the top:
+
+```bash
+FOLDS="0 1 2 3 4"       # folds to evaluate (space-separated)
+N_TTA=7                  # number of TTA versions (tta0 .. tta6)
+CKPT_DIR="nnUNet_models" # directory containing f{fold}/checkpoint_final.pth
+```
+
+**2. Set nnUNet environment variables**
+
+```bash
+export nnUNet_raw="$(pwd)/nnUNet_raw"
+export nnUNet_preprocessed="$(pwd)/nnUNet_preprocessed"
+export nnUNet_results="$(pwd)/nnUNet_results"
+```
+
+**3. Run**
+
+```bash
+bash run_nnunet_eval.sh
+```
+
+The script will:
+- Run `nnUNetv2_predict` for each fold × TTA combination, writing predictions to `nnUNet_results/Dataset100_ICAD/nnUNetTrainerNoMirroring__nnUNetResEncUNetLPlans__3d_fullres/tta{n}_f{fold}/`
+- Call `custom_tta_nnunet.py` to aggregate TTA predictions across passes
+
+> **Note:** To evaluate a single fold only, set `FOLDS="0"` in the script.
+
 ### TTA Post-processing for nnUNet
 
-After running nnUNet inference on all TTA test folders, use `custom_tta_nnunet.py` to aggregate the predictions:
+`custom_tta_nnunet.py` aggregates per-fold predictions across all TTA passes using the same strategy (mode voting with coordinate-mapping or inverse-transform) used for the UNet/CSNet pipeline. Configure the path constants at the top of its `__main__` block before running independently:
 
 ```bash
 python custom_tta_nnunet.py
 ```
-
-Configure the path constants at the top of the `__main__` block before running. The script loads the pickled random parameters saved by `prepare_data.py` and applies the same aggregation strategy (mode voting with coordinate-mapping or inverse-transform) used for the UNet/CSNet TTA evaluation.
 
 ---
 

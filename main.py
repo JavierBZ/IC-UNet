@@ -224,38 +224,68 @@ if __name__ == "__main__":
 
     if args.eval:
         # run_ids maps each fold to the specific wandb run that holds its saved model.
-        # Set these in the config under base.wandb.run_ids (list of 5 IDs, fold 0 -> 4)
-        # so they can be updated without modifying this script.
-        run_ids    = in_config["wandb"]["run_ids"]   # e.g. ["275563b0", "0989k3jy", ...]
-        folds      = list(range(len(run_ids)))        # [0, 1, 2, 3, 4]
-        wandb_dirs = [d for d in os.listdir("wandb/") if os.path.isdir(os.path.join("wandb/", d))]
+        # Set these in the config under base.wandb.run_ids (list of 5 IDs, fold 0 -> 4).
+        #
+        # If all entries are empty strings, model weights are loaded directly from the
+        # wandb/ directory in a model-specific subfolder (pretrained-weights mode):
+        #   wandb/UNet/fold_0_last_model.pt  ...  (unet, unetr, SwinUNETR)
+        #   wandb/CSNet/fold_0_last_model.pt ...  (CSNet)
+        run_ids = in_config["wandb"]["run_ids"]   # e.g. ["275563b0", "0989k3jy", ...]
+        folds   = list(range(len(run_ids)))        # [0, 1, 2, 3, 4]
 
         in_config["model_evaluation_path"] = [] if args.ensemble else None
 
-        for run_id, fold_idx in zip(run_ids, folds):
-            model_filename = f"fold_{fold_idx}_last_model.pt"
-            matched = False
-            for directory in wandb_dirs:
-                if run_id not in directory:
-                    continue
-                candidate = os.path.join("wandb", directory, "files", model_filename)
+        # Detect pretrained-weights mode: all run_ids are empty or absent
+        flat_weights_mode = all(rid == "" for rid in run_ids)
+
+        if flat_weights_mode:
+            # Determine subfolder from model type
+            model_name = in_config["model"]   # "unet" or "CSNet"
+            wandb_subfolder = "CSNet" if model_name == "CSNet" else "UNet"
+
+            # Expected layout:
+            #   wandb/UNet/fold_0_last_model.pt
+            #   wandb/CSNet/fold_0_last_model.pt
+            for fold_idx in folds:
+                model_filename = f"fold_{fold_idx}_last_model.pt"
+                candidate = os.path.join("wandb", wandb_subfolder, model_filename)
                 if not os.path.exists(candidate):
                     raise FileNotFoundError(
-                        f"Run '{run_id}' found but '{model_filename}' is missing. "
-                        f"Ensure fold {fold_idx} finished training."
+                        f"Pretrained weights not found: '{candidate}'. "
+                        f"Download weights and place them under wandb/{wandb_subfolder}/ "
+                        f"as fold_{{fold_idx}}_last_model.pt."
                     )
                 if args.ensemble:
                     in_config["model_evaluation_path"].append(candidate)
                 elif fold_idx == args.fold:
                     in_config["model_evaluation_path"] = candidate
-                matched = True
-                break
+        else:
+            wandb_dirs = [d for d in os.listdir("wandb/") if os.path.isdir(os.path.join("wandb/", d))]
 
-            if not matched:
-                raise FileNotFoundError(
-                    f"No wandb directory found for run ID '{run_id}' (fold {fold_idx}). "
-                    f"Check that base.wandb.run_ids in the config is correct."
-                )
+            for run_id, fold_idx in zip(run_ids, folds):
+                model_filename = f"fold_{fold_idx}_last_model.pt"
+                matched = False
+                for directory in wandb_dirs:
+                    if run_id not in directory:
+                        continue
+                    candidate = os.path.join("wandb", directory, "files", model_filename)
+                    if not os.path.exists(candidate):
+                        raise FileNotFoundError(
+                            f"Run '{run_id}' found but '{model_filename}' is missing. "
+                            f"Ensure fold {fold_idx} finished training."
+                        )
+                    if args.ensemble:
+                        in_config["model_evaluation_path"].append(candidate)
+                    elif fold_idx == args.fold:
+                        in_config["model_evaluation_path"] = candidate
+                    matched = True
+                    break
+
+                if not matched:
+                    raise FileNotFoundError(
+                        f"No wandb directory found for run ID '{run_id}' (fold {fold_idx}). "
+                        f"Check that base.wandb.run_ids in the config is correct."
+                    )
 
         evaluate(in_config, ensemble=args.ensemble)
 
