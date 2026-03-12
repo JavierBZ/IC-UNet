@@ -223,7 +223,7 @@ if __name__ == "__main__":
     # Configure paths here
     # -----------------------------------------------------------------------
     SAVE_DIRECTORY = "Predictions/nnunet/"
-    NNUNET_RAW     = "nnUNet_raw/Dataset100"
+    NNUNET_RAW     = "nnUNet_raw/Dataset100/"
     NNUNET_RESULTS = "nnUNet_results/Dataset100/nnUNetTrainerNoMirroring__nnUNetResEncUNetLPlans__3d_fullres/"
     NUM_FOLDS      = 5
     NUM_TTA        = 7
