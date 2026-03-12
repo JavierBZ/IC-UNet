@@ -228,7 +228,7 @@ if __name__ == "__main__":
         #
         # If all entries are empty strings, model weights are loaded directly from the
         # wandb/ directory in a model-specific subfolder (pretrained-weights mode):
-        #   wandb/UNet/fold_0_last_model.pt  ...  (unet, unetr, SwinUNETR)
+        #   wandb/UNet/fold_0_last_model.pt  ...  (unet)
         #   wandb/CSNet/fold_0_last_model.pt ...  (CSNet)
         run_ids = in_config["wandb"]["run_ids"]   # e.g. ["275563b0", "0989k3jy", ...]
         folds   = list(range(len(run_ids)))        # [0, 1, 2, 3, 4]
