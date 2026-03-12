@@ -14,7 +14,7 @@
 # ---------------------------------------------------------------------------
 # Configuration — edit these before running
 # ---------------------------------------------------------------------------
-DATASET="Dataset100_ICAD"
+DATASET="Dataset100"
 TRAINER="nnUNetTrainerNoMirroring"
 PLANS="nnUNetResEncUNetLPlans"
 CONFIG="3d_fullres"

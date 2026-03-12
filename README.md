@@ -68,7 +68,7 @@ Each `{patient}` folder corresponds to one case. Labels use the following intege
 
 ```bash
 conda env create -f environment.yml
-conda activate unet
+conda activate ICUNET
 ```
 
 ---
@@ -298,7 +298,7 @@ bash run_nnunet_eval.sh
 ```
 
 The script will:
-- Run `nnUNetv2_predict` for each fold × TTA combination, writing predictions to `nnUNet_results/Dataset100_ICAD/nnUNetTrainerNoMirroring__nnUNetResEncUNetLPlans__3d_fullres/tta{n}_f{fold}/`
+- Run `nnUNetv2_predict` for each fold × TTA combination, writing predictions to `nnUNet_results/Dataset100/nnUNetTrainerNoMirroring__nnUNetResEncUNetLPlans__3d_fullres/tta{n}_f{fold}/`
 - Call `custom_tta_nnunet.py` to aggregate TTA predictions across passes
 
 > **Note:** To evaluate a single fold only, set `FOLDS="0"` in the script.

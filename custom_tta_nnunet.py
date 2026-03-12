@@ -224,7 +224,7 @@ if __name__ == "__main__":
     # -----------------------------------------------------------------------
     SAVE_DIRECTORY = "Predictions/nnunet/"
     NNUNET_RAW     = "nnUNet_raw/Dataset100"
-    NNUNET_RESULTS = "nnUNet_results/Dataset100/nnUNetResEnc"
+    NNUNET_RESULTS = "nnUNet_results/Dataset100/nnUNetTrainerNoMirroring__nnUNetResEncUNetLPlans__3d_fullres/"
     NUM_FOLDS      = 5
     NUM_TTA        = 7
     # -----------------------------------------------------------------------
@@ -238,7 +238,7 @@ if __name__ == "__main__":
         for fold in range(NUM_FOLDS):
             crossval_folder = os.path.join(NNUNET_RAW, f"imagesTs_fold_{fold}_test_tta0")
             all_files = os.listdir(crossval_folder)
-            files     = [f for f in all_files if f.endswith(".nrrd") and "ICAD" in f]
+            files     = [f for f in all_files if f.endswith(".nrrd") and "IC" in f]
             IDs       = [int(f.split("_")[1]) for f in files]
 
             start_time = time.time()
@@ -248,22 +248,22 @@ if __name__ == "__main__":
 
                 for tta_idx in range(NUM_TTA):
                     random_params_folder = os.path.join(NNUNET_RAW, f"imagesTs_fold_{fold}_test_tta{tta_idx}")
-                    original_file        = os.path.join(NNUNET_RAW, "imagesTr", f"ICAD_{ID:04d}_0000.nrrd")
-                    original_label       = os.path.join(NNUNET_RAW, "labelsTr", f"ICAD_{ID:04d}.nrrd")
+                    original_file        = os.path.join(NNUNET_RAW, "imagesTr", f"IC_{ID:04d}_0000.nrrd")
+                    original_label       = os.path.join(NNUNET_RAW, "labelsTr", f"IC_{ID:04d}.nrrd")
                     tta_folder           = os.path.join(NNUNET_RESULTS, f"tta{tta_idx}_f{fold}")
 
-                    tta_files = [f for f in os.listdir(tta_folder) if f"ICAD_{ID:04d}" in f and f.endswith(".nrrd")]
+                    tta_files = [f for f in os.listdir(tta_folder) if f"IC_{ID:04d}" in f and f.endswith(".nrrd")]
                     if not tta_files:
                         print(f"Warning: no prediction file found for ID {ID:04d} in {tta_folder}")
                         continue
 
                     orig_dic = {"image": original_file, "label": original_label}
                     transformed_dic = {
-                        "image": os.path.join(random_params_folder, f"ICAD_{ID:04d}_0000.nrrd"),
-                        "label": os.path.join(tta_folder, f"ICAD_{ID:04d}.nrrd"),
+                        "image": os.path.join(random_params_folder, f"IC_{ID:04d}_0000.nrrd"),
+                        "label": os.path.join(tta_folder, f"IC_{ID:04d}.nrrd"),
                     }
 
-                    with open(os.path.join(random_params_folder, "random_params", f"ICAD_{ID:04d}_random_params.pkl"), "rb") as f:
+                    with open(os.path.join(random_params_folder, "random_params", f"IC_{ID:04d}_random_params.pkl"), "rb") as f:
                         random_params = pickle.load(f)
 
                     keys = ["image", "label"]

@@ -24,38 +24,6 @@ def neural_network(config):
             strides=(2, 2, 2, 2, 2),
             num_res_units=config["resnet_layers"],
         ).cuda()
-    elif config["model"] == "autoencoder":
-        return AutoEncoder(
-            spatial_dims=3,
-            in_channels=config["channels"],
-            out_channels=config["classes"],
-            channels=(2, 4, 8),
-            strides=(2, 2, 2),
-        ).cuda()
-    elif config["model"] == "unetr":
-        return UNETR(
-            img_size=(256, 256, 128),
-            spatial_dims=3,
-            in_channels=config["channels"],
-            out_channels=config["classes"],
-            proj_type="conv",
-            mlp_dim=2048,
-            feature_size=8,
-            hidden_size=256,
-            num_heads=8,
-            dropout_rate=config["dropout"],
-            norm_name="instance",
-        ).cuda()
-    elif config["model"] == "SwinUNETR":
-        return SwinUNETR(
-            img_size=(256, 256, 128),
-            spatial_dims=3,
-            in_channels=config["channels"],
-            out_channels=config["classes"],
-            depths=(2, 2, 2),
-            use_v2=True,
-        ).cuda()
-    
     elif config["model"] == "CSNet":
         return CSNet3D(
             classes=config["classes"],
