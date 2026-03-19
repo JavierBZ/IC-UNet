@@ -1,6 +1,7 @@
-# Uncertainty-Aware Automated Labeling of Intracranial Arteries Using Deep Learning
+# Uncertainty-Aware Automated Labeling of Intracranial Arteries
 
-3D segmentation and labeling of intracranial arteries from Time-of-Flight MRA images.
+This is the implementation of the paper [Uncertainty-Aware Automated Labeling of Intracranial Arteries](https://link.springer.com/article/10.1186/s12880-026-02276-5)
+
 Follow steps for training and evaluation of UNet, CSNet3D, and nnUNet with test-time augmentation (TTA) and optional ensemble inference.
 Cross-validation is performed using 5-fold CV.
 
@@ -318,10 +319,11 @@ python custom_tta_nnunet.py
 If you use this code in your research, please cite:
 
 ```bibtex
-@article{bisbal2025automated,
-  title={Automated Labeling of Intracranial Arteries with Uncertainty Quantification Using Deep Learning},
+@article{bisbal2026uncertainty,
+  title={Uncertainty-aware automated labeling of intracranial arteries using deep learning},
   author={Bisbal, Javier and Winter, Patrick and Jofre, Sebastian and Ponce, Aaron and Ansari, Sameer A and Abdalla, Ramez and Markl, Michael and Odeback, Oliver Welin and Tejos, Cristian and Uribe, Sergio and Schnell, Susanne and Marlevi, David},
-  journal={arXiv preprint arXiv:2509.17726},
-  year={2025}
+  journal={BMC Medical Imaging},
+  year={2026},
+  publisher={Springer}
 }
 ```
