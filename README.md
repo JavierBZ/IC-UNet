@@ -78,7 +78,7 @@ conda activate ICUNET
 
 Pretrained model weights for all five folds (UNet and CSNet) and all five folds (nnUNet) are available for download.
 
-**Download:** [[GDRIVE_LINK]](https://drive.google.com/drive/folders/1UQ4uxmMWabp84kFqoRIdz8ZLCWcvfasb?usp=sharing)
+**Download:** [[HuggingFace]](https://huggingface.co/javierbz24/UA-UNet/tree/main)
 
 ### UNet / CSNet weights
 
